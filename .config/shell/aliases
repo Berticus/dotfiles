@@ -1,0 +1,24 @@
+alias ls='ls --group-directories-first --color=auto'
+alias grep='grep --color=auto'
+alias weechat='weechat-curses'
+alias tophist="cat $HISTFILE | awk '{print \$2}' | awk 'BEGIN {RS=\";\"}{print \$1}' | sort | uniq -c | sort -nr | head"
+#alias tophist="fc -nl 1 | cut -d' ' -f1 | sort | uniq -c | sort -nr | head"
+alias tiddir='find -depth -type d -empty -exec rmdir {} \;'
+alias choosebg='feh -xrF /mnt/common/images/wallpaper'
+# example command: "inkscape blah \&"
+alias xfreerdp='xfreerdp --ignore-certificate -g 1280x960 -a 16 --plugin cliprdr'
+alias rdesktop='xfreerdp'
+
+# colors:
+# 0 - black    3 - yellow    6 - cyan
+# 1 - red      4 - blue      7 - white
+# 2 - green    5 - purple
+alias fsclock='tty-clock -sc -C 2'
+#alias pv_notify="echo msg > $XDG_DATA_HOME/im_fifo; mplayer $XDG_DATA_HOME/private_message.ogg &> /dev/null"
+#alias hl_notify="echo msg > $XDG_DATA_HOME/im_fifo; mplayer $XDG_DATA_HOME/channel_message.ogg &> /dev/null"
+#alias del_notify="echo > $XDG_DATA_HOME/im_fifo"
+
+alias dig='dig +search'
+
+alias vi='vim'
+alias sudo='sudo -E '

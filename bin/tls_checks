@@ -1,0 +1,94 @@
+# Not executable, source required
+
+CMD=$0
+EXIT_SUCCESS=0
+EXIT_SUPPLIED_UNKNOWN=1
+EXIT_MISS_REQUIRED_NO_WORK=2
+EXIT_MISS_REQUIRED_PARTIAL_WORK=3
+EXIT_NO_ACTION=4
+
+digest='sha512'
+keylength=15360
+warned=0
+
+function check_config_exists() {
+  if ! [ -f 'openssl.cnf' ]; then
+    echo "Missing openssl.cnf file"
+    exit $EXIT_MISS_REQUIRED
+  fi
+}
+
+function check_keylength_hash() {
+  #md5               512
+  #sha1             1024
+  #sha224           2048
+  #sha256           3072
+  #sha384           7680
+  #sha512          15360
+  if [ $warned -eq 0 ]; then
+    case "$digest" in
+      "md5")
+        if [ $keylength -lt 512 ]; then
+          echo -e "\033[43;30mWarning:\033[0m recommended minimum key length for \033[0;33\033[0m is \033[0;33m512\033[0m"
+          echo -e "\033[43;30mWarning:\033[0m hash algorithm is less than \033[0;33msha224\033[0m"
+          warned=$[$warned + 1]
+          pause_for_abort 3
+        fi
+        ;;
+      "sha1")
+        if [ $keylength -lt 1024 ]; then
+          echo -e "\033[43;30mWarning:\033[0m recommended minimum key length for \033[0;31msha1\033[0m is \033[0;31m1024\033[0m"
+          echo -e "\033[43;30mWarning:\033[0m hash algorithm is less than \033[0;31msha224\033[0m"
+          warned=$[$warned + 1]
+          pause_for_abort 3
+        fi
+        ;;
+      "sha224")
+        if [ $keylength -lt 2048 ]; then
+          echo -e "\033[43;30mWarning:\033[0m recommended minimum key length for \033[0;31msha224\033[0m is \033[0;31m2048\033[0m"
+          warned=$[$warned + 1]
+          pause_for_abort 3
+        fi
+        ;;
+      "sha256")
+        if [ $keylength -lt 3072 ]; then
+          echo -e "\033[43;30mWarning:\033[0m recommended minimum key length for \033[0;31msha256\033[0m is \033[0;31m3072\033[0m"
+          warned=$[$warned + 1]
+          pause_for_abort 3
+        fi
+        ;;
+      "sha384")
+        if [ $keylength -lt 7680 ]; then
+          echo -e "\033[43;30mWarning:\033[0m recommended minimum key length for \033[0;31msha384\033[0m is \033[0;31m7680\033[0m"
+          warned=$[$warned + 1]
+          pause_for_abort 3
+        fi
+        ;;
+      "sha512")
+        if [ $keylength -lt 15360 ]; then
+          echo -e "\033[43;30mWarning:\033[0m recommended minimum key length for \033[0;31msha512\033[0m is \033[0;31m15360\033[0m"
+          warned=$[$warned + 1]
+          pause_for_abort 3
+        fi
+        ;;
+      *)
+        echo -e "\033[43;30mWarning:\033[0m Unrecognized has algorithm \033[0;31m$digest\033[0m; assuming older algorithm"
+        warned=$[$warned + 1]
+        pause_for_abort 3
+        ;;
+    esac
+  fi
+}
+
+function pause_for_abort() {
+  echo -e "\07"
+  echo "Press Ctrl+C to abort"
+  i=$1
+  while [ $i -ge 0 ]; do
+    echo -n "$i..."
+    sleep 1
+    echo -ne "\033[4D"
+    i=$[$i - 1]
+  done
+  echo -ne "\033[1A\033[K\033[2B"
+}

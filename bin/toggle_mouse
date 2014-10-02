@@ -1,0 +1,10 @@
+#!/bin/sh
+
+cluttered=$(pgrep unclutter)
+
+if [ -z $cluttered ]
+then
+  unclutter -idle 1 -jitter 2 -root &
+else
+  kill $cluttered
+fi

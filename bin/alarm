@@ -1,0 +1,9 @@
+#!/bin/sh
+
+date
+if [[ -n $1 ]]
+then
+  sleep $1
+fi
+echo -e '\07'
+date

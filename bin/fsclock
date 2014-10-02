@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+tty-clock -s -c -t -r

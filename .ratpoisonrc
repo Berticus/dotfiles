@@ -1,0 +1,101 @@
+# change directory to $HOME
+chdir
+
+exec rpws init 12 -k
+exec stalonetray --geometry 6x1 -i 16 --grow-gravity E --max-geometry 6x1
+
+# change terminal
+alias term exec urxvtc
+
+# use the super key as modifier, instead of CTRL+t
+# M is the ALT key
+exec xmodmap -e "keycode 133 = F30"
+escape F30
+
+# start the status bar
+alias showbar exec ratpoison -c "set padding 0 17 0 0" -c "exec killall dzen2" -c "exec rstatus" -c "exec lstatus"
+alias hidebar exec ratpoison -c "exec killall dzen2" -c "set padding 0 0 0 0"
+
+# toggle border
+alias setborder exec ratpoison -c "set border 1"
+alias unsetborder exec ratpoison -c "set border 0"
+
+# printscreen
+alias prtscn exec scrot && ratpoison -c "echo screenshot saved!"
+
+# gimp-friendly
+alias gfriendly exec ratpoison -c "hsplit 3/20" -c "focusright" -c "hsplit 14/17"
+
+# move window to next/prev group
+alias mwprev exec ratpoison -c "gmove $((($wspl + 10) % 12))" -c "exec rpws $((($wspl + 10) % 12 + 1))"
+alias mwnext exec ratpoison -c "gmove $(($wspl % 12))" -c "exec rpws $(($wspl % 12 + 1))"
+
+# lock screen
+alias slock exec i3lock -uc 000000
+
+alias unclutter exec toggle_mouse
+
+# set padding for bar
+set padding 0 17 0 0
+
+warp off
+msgwait 2
+startup_message off
+set winname title
+set border 1
+set winliststyle column
+set wingravity center
+set bwcolor black
+set fwcolor #800080
+
+set fgcolor #ffffff
+set bgcolor #000000
+set bargravity sw
+#set font -windows-proggysquare-medium-r-normal--11-80-96-96-c-70-iso8859-1
+#set font -xos4-terminus-medium-r-normal--12-120-72-72-c-60-iso8859-1
+
+# jump to default tag
+gselect 0
+
+definekey top M-S hsplit
+definekey top M-s split
+definekey top M-q remove
+definekey top M-o only
+definekey top M-h focusleft
+definekey top M-l focusright
+definekey top M-k focusup
+definekey top M-j focusdown
+definekey top M-H exchangeleft
+definekey top M-L exchangeright
+definekey top M-K exchangeup
+definekey top M-J exchangedown
+definekey top M-x next
+definekey top M-z prev
+definekey top M-Q quit
+definekey top M-r resize
+definekey top M-u undo
+definekey top M-b banish
+definekey top M-g groups
+definekey top M-G gfriendly
+definekey top M-w windows
+definekey top M-C delete
+definekey top M-S-Return term
+definekey top M-p exec dmenurc
+definekey top Print prtscn
+definekey top M-Y setborder
+definekey top M-N unsetborder
+definekey top M-y showbar
+definekey top M-n hidebar
+definekey top M-C-h mwprev
+definekey top M-C-l mwnext
+definekey top M-C-k nextscreen
+definekey top M-C-j prevscreen
+definekey root s-l slock
+definekey top M-m unclutter
+
+# hit super key, and then Shift + r
+bind R restart
+bind semicolon colon
+bind colon exec
+
+unmanage stalonetray

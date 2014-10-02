@@ -1,0 +1,53 @@
+#!/usr/bin/sh
+#exportPS1='[\u@\h \W]\$ '
+
+export INPUTRC=/etc/inputrc
+export PATH=$HOME/bin:$HOME/src/hcp-aw/anywhere-qa/ras:$HOME/src/hcp-aw/anywhere-qa/bin:/usr/share/perl5/vendor_perl/auto/share/dist/Cope:$PATH
+export PYTHONPATH=$PYTHONPATH:/home/achang/src/hcp-aw/anywhere-qa/pythonlib
+export PYTHONSTARTUP=$HOME/.pythonrc
+export BROWSER='firefox'
+export PAGER='/usr/bin/less'
+export EDITOR='vim'
+export VISUAL='vim'
+#export NNTPSERVER=''
+
+export LESS_TERMCAP_mb=$(printf "\e[01;31m") # begin blinking
+export LESS_TERMCAP_md=$(printf "\e[01;38;5;74m") # begin bold
+export LESS_TERMCAP_me=$(printf "\e[0m") # end mode
+export LESS_TERMCAP_se=$(printf "\e[0m") # end standout-mode
+export LESS_TERMCAP_so=$(printf "\e[38;5;246m") # begin standout-mode - info box
+export LESS_TERMCAP_ue=$(printf "\e[0m") # end underline
+export LESS_TERMCAP_us=$(printf "\e[04;38;5;146m") # begin underline
+export READNULLCMD=less # use less as the pager
+export HTTP_CA_DIR='/usr/share/ca-certificates/'
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CONFIG_HOME="$HOME/.config"
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+os=$(source=$(if [[ -e /etc/os-release ]]; then echo "/etc/os-release"; else echo "/usr/lib/os-release"; fi;); awk -F = '/^NAME=/ {print $2}' $source)
+if [[ $os = "Arch Linux" ]]; then
+  export JAVA_HOME=/usr/lib/jvm/java-7-openjdk/jre/
+  export JDK_HOME=/usr/lib/jvm/java-7-openjdk/
+elif [[ $os = "Fedora" ]]; then
+  export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.60-2.4.7.0.fc20.x86_64/jre/
+  export JDK_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.60-2.4.7.0.fc20.x86_64/
+fi
+
+export P4PORT=arc-source-01:1666
+export P4USER=$(whoami)
+export P4CLIENT=$(hostname -s)
+export P4MERGE=p4merge
+export P4EDITOR=vim
+export PDIFF_DIFFTOOL='vimdiff'
+export GDIFF_DIFFTOOL='vimdiff'
+#export PDIFF_DIFFTOOL='meld'
+export XDG_VTNR=7
+
+#. ~/bin/adev.sh "godzilla/godzilla_int" 2&> /dev/null
+#cd - > /dev/null
+
+
+export GPG_TTY=$(tty)
+
+# flash fix for when Linux HW  Video Decode is enabled
+#export VDPAU_NVIDIA_NO_OVERLAY=1

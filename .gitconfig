@@ -1,0 +1,19 @@
+[github]
+	user = Berticus
+[color]
+	ui = true
+[user]
+	name = Albert Chang
+    #email = 
+[core]
+	editor = vim
+[merge]
+	tool = vimdiff
+[mergetool]
+	prompt = false
+	keepBackup = false
+[push]
+	default = simple
+[alias]
+	vimdiff = difftool --tool=vimdiff
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit

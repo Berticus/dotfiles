@@ -1,0 +1,7 @@
+set gui=noaddons,nobookmarks,nomenu,nonavigation,tabs
+"set defaultsearch=ddg
+set complete=sSlhbf
+set hlsearch
+set editor=cvim
+set tabnumbers
+colorscheme candy

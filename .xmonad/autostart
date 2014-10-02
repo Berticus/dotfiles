@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+urxvtd -q -o -f
+unclutter -idle 1 -jitter 2 &
+xcompmgr &
+eval $(cat ~/.fehbg) &

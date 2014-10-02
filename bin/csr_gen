@@ -1,0 +1,89 @@
+#!/usr/bin/bash
+# http://anywherewiki/index.php/QA_Team/SSL_Certificates
+# man openssl
+# man req
+# man x509
+# man 5 config
+# man x509v3_config
+# man ca
+# http://www.keylength.com/en/4/
+
+. tls_checks
+
+function usage() {
+echo "usage: $(basename $0) [OPTIONS] <*.csr> [-- ...]
+DESCRIPTION
+  Easier interface to openssl to create CSRs
+
+OPTIONS
+  -h, --help            you're looking at it
+  -d D, --digest=D      digest (defaults to sha512)
+  -k L, --keylength=L   key length (defaults to 4096)
+
+  Any options after '--' will be handed directly to openssl.
+
+NOTES
+  This requires a well formed openssl.cnf file. Run man 5 config to read how to
+  create one.
+
+  Extra commands will be passed down to openssl, but may not necessarily
+  override any hardcoded ones.
+
+  Hash            Key length (recommendation from NIST[1])
+  md5               512
+  sha1             1024
+  sha224           2048
+  sha256           3072
+  sha384           7680
+  sha512          15360
+
+  A warning will be produced if the hash is less than sha224 or the recommended
+  key length is less than the provided key length.
+
+FOOTNOTES
+  [1] http://www.keylength.com/en/4/
+  "
+}
+
+ARGS=$(getopt -n $(basename $CMD) -o $short_opts -l $long_opts -- "$@")
+eval set -- "$ARGS"
+[ $? -ne 0 ] && usage
+
+while :; do
+  case "$1" in
+    '-h' | '--help')
+      usage
+      exit $EXIT_SUCCESS
+      ;;
+
+    '-k' | '--keylength')
+      shift
+      keylength=$1
+      ;;
+
+    '-d' | '--digest')
+      shift
+      digest=$1
+      ;;
+
+    *)
+      if [ "${1##*.}" = 'csr' ]; then
+        csr_req="$1"
+      else
+        usage
+        exit $EXIT_SUPPLIED_UNKNOWN
+      fi
+      ;;
+  esac
+
+  shift
+done
+
+check_config_exists
+check_keylength_hash
+
+s_key="server.key"
+openssl genrsa -out server.key $keylength
+echo "Private key generated as $s_key"
+openssl req -$digest -utf8 -batch "$@" -new -key server.key -config openssl.cnf -out "$csr_req"
+echo "CSR $csr_req generated"

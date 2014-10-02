@@ -1,0 +1,59 @@
+#!/bin/sh
+# Author: Albert Chang <albert.chang@gmx.com>
+
+# Dependencies:
+#   curl
+#   jshon
+#       jansson
+
+if [ $# -lt 1 ]; then
+  echo "Missing URL!"
+  exit 1
+fi
+
+# $XDG_CACHE_HOME
+# $HOME/.cache
+# /home/$(whoami)/.cache
+cache="${XDG_CACHE_HOME:-${HOME:-/home/$(whoami)}/.cache}/$(basename $0)"
+if [ ! -d "$cache" ]; then
+  mkdir "$cache"
+fi
+
+# Protect jshon from output that it cannot process
+BLACKLIST="i|D|v"
+_blacklist_str=$(echo $BLACKLIST | tr -d '|')
+
+# TODO: keep it in a variable within the script.
+header_file="/$cache/$(date +%s%N).header"
+#if [ ! -p "$header_file" ]; then
+#  mkfifo "$header_file"
+#fi
+
+# inject our own args
+cmd_str="curl -sD $header_file"
+
+# remove blacklisted headers, while constructing the final command to be used
+echo -n "curl"
+for i in "$@"; do
+  arg="$(echo "$i" | awk "/^-.*($BLACKLIST).*/ {print \$1}" | tr -d $_blacklist_str)"
+  if [ -n "$arg" ]; then
+    cmd_str="$cmd_str $arg"
+    echo -n " $arg"
+  elif [ "${i:0:1}" = '-' ]; then
+    cmd_str="$cmd_str $i"
+    echo -n " $i"
+  else
+    cmd_str="$cmd_str \"$i\""
+    echo -n " \"$i\""
+  fi
+done
+
+output=$(eval $cmd_str)
+# TODO: trap unexpected return
+
+echo
+cat "$header_file"
+echo -e "\n$output" | python -mjson.tool
+echo
+
+rm $header_file

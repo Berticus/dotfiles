@@ -1,0 +1,13 @@
+" ==Vimperator_Color_Scheme==
+" name: Candy
+" ==Candy_Colorscheme_settings==
+
+hi CmdLine              CmdLine background: #1f1f1f; color: #d1d1d1; transition: all 0.25s;
+hi CompItem[selected]   background: #fbce62; box-shadow: 0px 0px 1px #fb9a62
+hi Filter               border-radius: 2px; background: #fb9a62; border: 1px solid #6293fb
+
+hi Hint                 font-family: monospace; font-size: 10px; font-weight: bold; text-transform: uppercase; color: white; background-color: rgba(251, 104, 98, 0.7); border-color: ButtonShadow; border-width: 0px; border-style: solid; padding: 0px 1px 0px 1px;
+hi HintActive           background-color: #a1fb62; color: black;
+hi HintElem             background-color: #f6fb62; color: black;
+
+hi ErrorMsg             color:white; background: #c02621; font-weight: bold;

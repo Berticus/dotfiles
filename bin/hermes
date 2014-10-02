@@ -1,0 +1,80 @@
+#!/bin/sh
+# Author: Albert Chang <albert.chang@gmx.com>
+
+function usage()
+{
+  echo "Usage $0 REMOTE PROGRAM [ARGS]"
+  echo "Runs local program or script on a remote system."
+}
+
+# Print usage if there are missing required arguments or if there is the help
+# flag
+
+if [ -z "$1" -o -z "$2" ]
+then
+  usage
+  exit 1
+fi
+
+if [ "$1" = '-h' -o "$1" = '--help' ]
+then
+  usage
+  exit 0
+fi
+
+
+# preserving args
+this=$(basename $0)
+remote_addr=$1
+exe=$2
+# determine prog args
+shift 2
+ARGS=$@
+
+# Load config
+rc="${this}rc"
+# $XDG_CONFIG_HOME
+# $HOME/.conf
+# /home/$(whoami)/.config
+conf="${XDG_CONFIG_HOME:-${HOME:-/home/$(whoami)}/.config}"
+mkdir -p $conf > /dev/null 2>&1
+
+local_prog=$(which --skip-alias --skip-functions $exe) > /dev/null 2>&1
+if [ ! $? ]
+then
+  echo "permission denied: $exe" 1>&2
+  exit 1
+fi
+
+# if config file exist, extract variables, otherwise make it
+# probably good for ssh options
+if [ -e "$conf/$rc" ]
+then
+  while read line
+  do
+    eval "$(echo $line | awk -F '#' '{if ( $1 != "") print $1}' "$conf/$rc" | awk -F '=' '/^[ \t]*[a-zA-Z][a-zA-Z0-9_]*[ \t]*=[ \t]*[a-zA-Z][a-zA-Z0-9_]*[ \t]*$/ {print $1"="$2}' | sed 's/[ \t]//g')"
+  done < "$conf/$rc"
+else
+  touch "$conf/$rc"
+fi
+
+cat "$local_prog" | ssh "$remote_addr" '
+# find a filename which does not exist
+until [ ! -e "/tmp/$remote_prog" ]
+do
+  remote_prog="$(date +%s%N)$$"
+done
+
+# Upload program/script
+cat > "/tmp/$remote_prog"
+chmod 700 /tmp/$remote_prog
+
+# Execute
+/tmp/$remote_prog' $ARGS ';\
+EXITCODE=$?
+
+# Clean up after ourselves
+rm -f /tmp/$remote_prog
+
+# return exit code
+exit $EXITCODE'

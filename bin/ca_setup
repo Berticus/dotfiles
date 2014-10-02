@@ -1,0 +1,227 @@
+#!/usr/bin/sh
+# http://anywherewiki/index.php/QA_Team/SSL_Certificates
+# man openssl
+# man req
+# man x509
+# man 5 config
+# man x509v3_config
+# man ca
+# http://www.keylength.com/en/4/
+
+. tls_checks
+
+# defaults
+ca_type='ROOT'
+
+SUB_NEW_CA='new'
+SUB_INT_SIGN='int_sign'
+SUB_CA_SIGN='ca_sign'
+
+long_opts="help,keylength:,digest:,root,int"
+short_opts=":hk:d:ri"
+
+function sub_int_sign() {
+  local csr
+  local target
+
+  if [ "${1##*.}" = 'csr' ]; then
+    csr="$1"
+    shift
+  else
+    echo "Must supply csr (with a csr extension)"
+    exit $EXIT_MISSING_REQUIRED_NO_WORK
+  fi
+
+  target=$(dirname -z "$csr")
+  openssl ca -md $digest -utf8 -batch "$@" -extensions v3_ca -out "$target/cacert.pem" -in "$csr" -config openssl.cnf
+}
+
+function sub_ca_sign() {
+  local csr
+  local name
+
+  if [ "${1##*.}" = 'csr' ]; then
+    csr="$1"
+    shift
+  else
+    echo "Must supply csr (with a csr extension)"
+    exit $EXIT_MISSING_REQUIRED_NO_WORK
+  fi
+
+  name="${csr%.csr}.pem"
+  openssl ca -md $digest -utf8 -batch "$@" -config openssl.cnf -policy policy_anything -out $name -infiles $csr
+}
+
+function sub_new() {
+  local csr_req
+
+  csr_req="$(basename "$(pwd)").csr"
+
+  mkdir certs crl newcerts private
+  openssl rand -hex 8 > serial
+  cp /dev/null index.txt
+  openssl genrsa -out private/cakey.pem $keylength
+
+  echo "Creating signing request"
+  openssl req -$digest -utf8 -batch -new -sha1 -config openssl.cnf -key private/cakey.pem -out "$csr_req"
+  if [ $ca_type = 'INT' ]; then
+    if [ -e ../cacert.pem ]; then
+      # Previous was an intermediate, ask to sign
+      echo "Signing CSR with previous CA"
+      cd ..
+        $SUB_INT_SIGN "$(basename "$OLDPWD")/$csr_req" "$@"
+      cd "$OLDPWD"
+
+      cat cacert.pem > chain.pem
+      if [ -e ../chain.pem ]; then
+        cat ../chain.pem >> chain.pem
+      else
+        cat ../cacert.pem >> chain.pem
+      fi
+    else
+      # Did not find a high CA
+      echo "Generated $csr_req CSR that needs to be signed"
+      exit $EXIT_MISSING_REQUIRED_PARTIAL_WORK
+    fi
+  else
+    echo "Creating Root CA as cacert.pem"
+    openssl ca -md $digest -selfsign -utf8 -batch "$@" -extensions v3_ca -out cacert.pem -in "$csr_req" -config openssl.cnf
+  fi
+
+  # locate all children directory with an openssl.cnf file
+  ca_list=( $(find -L . -mindepth 2 -type f -name openssl.cnf | tail -1) )
+
+  for ca in $ca_list; do
+    ca=$(dirname "$ca")
+    echo "Processing certificate authority $(basename "$ca")"
+    cd "$ca"
+      ca_type='INT'
+      $SUB_NEW_CA "$@"
+  done
+}
+
+function usage() {
+  echo "usage: $(basename $0) [OPTIONS] [SUBCOMMAND] ...
+DESCRIPTION
+  Easier interface to openssl to setup CAs and sign CSRs
+
+OPTIONS
+  -h, --help            you're looking at it
+  -d D, --digest=D      digest (defaults to sha512)
+  -k L, --keylength=L   key length (defaults to 4096)
+
+  Any options after '--' will be handed directly to openssl.
+
+SUBCOMMANDS
+  new [SUBOPTIONS] [-- ...]
+    Creates a new CA
+
+    -r, --root          creates a new root CA
+    -i, --int           creates a new intermediate CA (automatically signed by
+                        higher CAs if detected
+
+    Any children directory with an openssl.cnf file will be assumed to be an
+    intermediate certificate authority.
+
+  int_sign FILE.csr [-- ...]
+    Signs a CSR from an intermediate CA
+
+  ca_sign FILE.csr [-- ...]
+    Signs a CSR from an end point server
+
+NOTES
+  This requires a well formed openssl.cnf file. Run man 5 config to read how to
+  create one.
+
+  Extra commands will be passed down to openssl, but may not necessarily
+  override any hardcoded ones.
+
+  Hash            Key length (recommendation from NIST[1])
+  md5               512
+  sha1             1024
+  sha224           2048
+  sha256           3072
+  sha384           7680
+  sha512          15360
+
+  A warning will be produced if the hash is less than sha224 or the recommended
+  key length is less than the provided key length.
+
+FOOTNOTES
+  [1] http://www.keylength.com/en/4/
+  "
+}
+
+ARGS=$(getopt -n $(basename "$CMD") -o $short_opts -l $long_opts -- "$@")
+eval set -- "$ARGS"
+[ $? -ne 0 ] && usage
+
+while :; do
+  case "$1" in
+    '-h' | '--help')
+      usage
+      exit $EXIT_SUCCESS
+      ;;
+
+    '-k' | '--keylength')
+      shift
+      keylength=$1
+      ;;
+
+    '-d' | '--digest')
+      shift
+      digest=$1
+      ;;
+
+    '-l' | '--level')
+      shift
+      int_lvl=$1
+      ;;
+
+    '-i' | '--int')
+      ca_type='INT'
+      ;;
+
+    '-r' | '--root')
+      ca_type='ROOT'
+      ;;
+
+    "$SUB_NEW_CA")
+      shift
+      check_keylength_hash
+      check_config_exists
+      sub_new "$@"
+      break
+      ;;
+
+    "$SUB_INT_SIGN")
+      shift
+      check_config_exists
+      check_keylength_hash
+      sub_int_sign "$@"
+      break
+      ;;
+
+    "$SUB_CA_SIGN")
+      shift
+      check_config_exists
+      check_keylength_hash
+      sub_ca_sign "$@"
+      break
+      ;;
+
+    --)
+      if [ $# -eq 0 ]; then
+        usage
+        exit $EXIT_NO_ACTION
+      fi
+      ;;
+
+    *)
+      usage
+      exit $EXIT_SUPPLIED_UNKNOWN
+      ;;
+  esac
+
+  shift
+done

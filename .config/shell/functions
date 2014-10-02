@@ -1,0 +1,185 @@
+# greps pdf files
+# $1 - pattern
+# $2 - base directory
+#      will search recursively, unless a file is specified
+function pdfgrep() {
+  if [[ $# -eq 2 ]]; then
+    if [[ ${2#*.} = "pdf" ]]; then
+      pdftotext -q -nopgbrk "$2" - | grep --color=always -niEe "$1"
+      return 0
+    else
+      searchpath=($(ls $2/**/*.pdf))
+    fi
+  elif [[ $# -eq 1 ]]; then
+    searchpath=($(ls **/*.pdf))
+  else
+    echo "Usage: pdfgrep PATTERN [FILE|DIRECTORY]"
+  fi
+
+  for i in $searchpath; do
+    results=$(pdftotext -q -nopgbrk "$i" - | grep --color=always -niEe "$1")
+    if [[ -n $results ]]; then
+      echo -e "\nFile: $i"
+      echo -e "$results"
+    fi
+  done
+}
+
+function tweet() {
+  #tweeter=
+  #passwd=
+
+  if [ -z "$1" ]; then
+    echo "No status update entered. Showing last twenty updates:"
+    curl --basic -s -u $tweeter:$passwd -G http://twitter.com/statuses/friends_timeline.xml | sed --quiet --expression='s/<name>\(.*\)<\/name>/\1/p' --expression='s/<text>\(.*\)<\/text>/\1/p'
+  elif [ $(( $( echo -n "$1" | wc -m ) )) -gt 140 ]; then
+    echo "Tweet too long ($(( $( echo -n "$1" | wc -m ) ))"
+  else
+    curl -s -u $tweeter:$passwd  -d "status=$1" http://twitter.com/statuses/update.xml > /dev/null
+    echo Status updated.
+  fi
+}
+
+function cliplay() {
+  type=$(echo "$1" | awk -F . '{print $NF}')
+  case $type in
+    'mp3')
+    artist=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 TPE1 | cut -c 23-)
+    title=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 TIT2 | cut -c 23-)
+    album=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 TALB | cut -c 23-)
+    tracknumber=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 TRCK | cut -c 23-)
+    ;;
+    *)
+    artist=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 ARTIST | cut -c 23-)
+    title=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 TITLE | cut -c 23-)
+    album=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 ALBUM | cut -c 23-)
+    tracknumber=$(ffmpeg -i "$1" 2>&1 | grep --color=never -m 1 TRACKNUMBER | cut -c 23-)
+    ;;
+  esac
+
+  length=$(ffmpeg -i "$1" 2>&1 | grep --color=never Duration | cut -c 16- | cut -c -5)
+  length=$((60*10#${length%:*}+10#${length#*:}))
+
+  # must play song through
+  # cannot fast forward
+  # allows pauses
+  # -1 is to allow for songs that play for fractions of a second
+  finish=$(( $(date +%s)+$length-1))
+  mpv -really-quiet "$1" &> /dev/null
+  if [ $(date +%s) -ge $finish ]; then
+    #echo $artist $title $album $length $tracknumber
+    lastfmpost "$artist" "$title" "$album" "$length" "$tracknumber" &> /dev/null
+
+    if [ $? -eq 1 ]; then
+        echo "cliplay error submitting to last.fm"
+    fi
+  fi
+}
+
+function explay() {
+  _PLAYCMD="mplayer"
+  if [ $# -lt 1 ]; then
+    echo "USAGE: $0 [OPTION] FILE"
+    echo "-l"
+    echo "    Scrobble to last.fm"
+    return 1
+  fi
+
+  while getopts ":l" opt; do
+    case $opt in
+      l)
+      _PLAYCMD="cliplay"
+      ;;
+      *)
+      echo "Usage: $0 [OPTION] FILE"
+      echo "-l"
+      echo "    Scrobble to last.fm"
+      return 0
+      ;;
+    esac
+  done
+
+  type=$(echo "$1" | awk -F . '{print $NF}')
+  case $type in
+    'rar')
+    unrar p -inul $1 | $_PLAYCMD -
+    ;;
+    'zip')
+    unzip -p $1 | $_PLAYCMD -
+    ;;
+    *)
+    echo "Not a recognized archive file";
+    return 1
+    ;;
+  esac
+}
+
+function wiki() {
+  numargs=$#
+
+  if [ $numargs -lt 1 ]; then
+    echo "Usage: $0 Your Wikipedia Query"
+    echo "Ex: $0 linux"
+    echo "Ex: $0 \"linux kernel\""
+   return 1
+  fi
+
+  if [ $numargs -gt 1 ]; then
+    args=$(echo $args|sed 's/ /_/g')
+  fi
+
+  args="$@"
+
+  results=$(links -dump "https://secure.wikimedia.org/wikipedia/en/wiki/${args}")
+
+  if [ $(echo "$results" | grep -c 'Wikipedia does not have an article with this exact name.') -gt 0 ]; then
+    args=$(echo $args|sed 's/_/ /g')
+    echo "No results found for $args"
+    return 2
+  fi
+
+  echo "$results" | sed -e 's/\[IMG\]//g' -e 's/\[edit\]//g' -e '1,/Jump to:/d' -e '/.* redirects here\./d' | less
+}
+
+function define() {
+  if [ $# -lt 1 ]; then
+    echo "USAGE: $0 WORD"
+    return 1
+  fi
+
+  results=$(links -http.fake-user-agent 'Mozilla/5.0' -dump "http://thefreedictionary.com/p/$1")
+
+  if [ $(echo "$results" | grep -c 'not available in the general English dictionary and thesaurus.') -gt 0 ] || [ $(echo "$results" | grep -c 'Word not found in the Dictionary and Encyclopedia.') -gt 0 ]; then
+    echo "$1 undefined."
+    return 2
+  fi
+
+  echo "$results" | tail -n +7 | less
+}
+
+function rarplay() {
+  unrar p -inul $1 | mpv -
+}
+
+# Upload to sprung.us
+function sprunge() {
+  if [ $# -lt 1 ]; then
+    echo "USAGE: $0 [OPTION] FILE"
+    echo "-l"
+    echo "    Upload to sprung.us"
+    return 1
+  fi
+
+  cat "$1" | curl -F 'sprunge=<-' http://sprunge.us
+}
+
+# perform rot13 on given text
+function rot13() {
+  cat "$@" | tr 'a-zA-Z' 'n-za-mN-ZA-M'
+}
+
+function alarm() {
+  date
+  sleep $1
+  echo -e '\07'
+}
