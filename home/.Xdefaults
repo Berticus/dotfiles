@@ -1,4 +1,4 @@
-# hardlink ~/.XResources and ~/.Xdefaults
+! hardlink ~/.XResources and ~/.Xdefaults
 urxvt.depth: 32
 urxvt.background: [70]black
 urxvt.foreground: #ffffff
@@ -34,14 +34,14 @@ urxvt.matcher.button: 1
 ! color6: cyan
 ! color7: white
 
-urxvt.*color0: #292929
-urxvt.*color1: #de6951
-urxvt.*color2: #bcda55
-urxvt.*color3: #e2a564
-urxvt.*color4: #2187f6
-urxvt.*color5: #875c8d
-urxvt.*color6: #4390b1
-urxvt.*color7: #d2d2d2
+*.color0: #282a2e
+*.color1: #bc3f39
+*.color2: #48bc39
+*.color3: #bcb739
+*.color4: #3951bc
+*.color5: #bc39a3
+*.color6: #39b1bc
+*.color7: #bbc8d6
 
 ! Light:
 ! color8: bright black
@@ -53,14 +53,14 @@ urxvt.*color7: #d2d2d2
 ! color14: bright cyan
 ! color15: bright white
 
-urxvt.*color8: #3d3d3d
-urxvt.*color9: #c56a47
-urxvt.*color10: #9dbf60
-urxvt.*color11: #ec8a25
-urxvt.*color12: #5495dc
-urxvt.*color13: #e41f66
-urxvt.*color14: #276cc2
-urxvt.*color15: #ffffff
+*.color8: #373b41
+*.color9: #ff5850
+*.color10: #5dff50
+*.color11: #f9ff50
+*.color12: #505dff
+*.color13: #ff50f4
+*.color14: #50e6ff
+*.color15: #c5c8c6
 
 urxvt.*keysym.M-Up: \033[1;3A
 urxvt.*keysym.M-Down: \033[1;3B
