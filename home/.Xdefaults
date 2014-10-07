@@ -23,7 +23,9 @@ urxvt.matcher.button: 1
 *VT100*colorBD: red
 
 ! terminal colors!
-
+! http://xcolors.net
+! http://terminal.sexy
+!
 ! Normal:
 ! color0: black
 ! color1: red
@@ -43,7 +45,7 @@ urxvt.matcher.button: 1
 *.color6: #39b1bc
 *.color7: #bbc8d6
 
-! Light:
+! Bright:
 ! color8: bright black
 ! color9: bright red
 ! color10: bright green
