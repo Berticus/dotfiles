@@ -1,3 +1,4 @@
 home/.vimperator/info
 *.hi
 *.o
+etc/pacman.d/gnupg
