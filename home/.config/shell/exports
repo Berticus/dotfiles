@@ -3,7 +3,7 @@
 
 export INPUTRC=/etc/inputrc
 export PATH=$HOME/bin:$HOME/src/hcp-aw/anywhere-qa/ras:$HOME/src/hcp-aw/anywhere-qa/bin:/usr/share/perl5/vendor_perl/auto/share/dist/Cope:$PATH
-export PYTHONPATH=$PYTHONPATH:/home/achang/src/hcp-aw/anywhere-qa/pythonlib
+#export PYTHONPATH=$PYTHONPATH
 export PYTHONSTARTUP=$HOME/.pythonrc
 export BROWSER='firefox'
 export PAGER='/usr/bin/less'

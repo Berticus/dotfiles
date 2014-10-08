@@ -1,28 +1,7 @@
 # Check for an interactive session
 # I should really color this...
 [ -z "$PS1" ] && return
-
-# Source arc-deploy definitions
-if [ -f ~/bin/.bashrc-arcDeployFunctions ]; then
-	. ~/bin/.bashrc-arcDeployFunctions
-fi
-if [ -f ~/bin/.bashrc-vpnFunctions ]; then
-	. ~/bin/.bashrc-vpnFunctions
-fi
-
-if [ -f ~/bin/.bashrc-arcDevFunctions ]; then
-	. ~/bin/.bashrc-arcDevFunctions
-fi
-
-if [ -f ~/bin/.bashrc-automationFunctions ]; then
-	. ~/bin/.bashrc-automationFunctions
-fi
-
-if [ -f ~/bin/.bashrc-adminFunctions ]; then
-	. ~/bin/.bashrc-adminFunctions
-fi
-
-# change this as XDG variables are changed
+#
 . ~/.config/shell/exports
 . ~/.config/shell/functions
 . ~/.config/shell/aliases
