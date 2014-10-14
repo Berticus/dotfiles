@@ -19,8 +19,6 @@ set acd " autochdir
 syntax on " Enable syntax highlighting
 filetype plugin indent on " Enable filetype detection, plugins, and indentation
 
-nnoremap " `
-nnoremap ` '
 set hidden " allow hidden buffers
 runtime macros/matchit.vim
 set wildmenu
@@ -95,8 +93,6 @@ let java_highlight_all=1
 let java_highlight_functions="style"
 let java_allow_cpp_keywords=1
 
-let mapleader=","
-let g:mapleader=","
 let g:tex_flavor="pdflatex"
 "let g:tex_flavor="latex"
 
