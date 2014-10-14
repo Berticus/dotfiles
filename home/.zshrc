@@ -1,11 +1,15 @@
 # Check for an interactive session
 # I should really color this...
 [ -z "$PS1" ] && return
-#
+
+# change this as XDG variables are changed
 . ~/.config/shell/exports
 . ~/.config/shell/functions
 . ~/.config/shell/aliases
 
+# TODO: consider using git hooks and templates to have git push status to save
+# git status calculation every time a command is executed in a git working
+# directory.
 function precmd() {
   _git=$(git branch 2>/dev/null | sed -e "/^\s/d" -e "s/^\*\s//")
   if [ "$_git" != '' ]; then
@@ -27,7 +31,18 @@ function precmd() {
       _color='\e[0;32m'
     fi
 
-    _git_info=$(echo -e "(%{$_color%}$_git%{\e[0m%})")
+    _git_info=$(echo -e "(%{$_color%}$_git%{\e[0m%}")
+
+    _git_remotes=( $(git remote) )
+    for i in "$_git_remotes"; do
+      _unpushed_changes="$(git log $i/$_git..HEAD)"
+      if [ "$_unpushed_changes" != "" ]; then
+        _git_info="${_git_info}*"
+        break
+      fi
+    done
+
+    _git_info="${_git_info})"
 
     export PS1="[%* %n@%M %c ${_git_info}]%# "
   else
@@ -140,7 +155,7 @@ for keymap in v a; do
     bindkey -$keymap '^r' history-incremental-search-backward
 done
 
-eval $(keychain --eval --nogui -Q -q upcnj.tvg.id_dsa id_dsa.achang id_dsa_archivas_weak)
+eval $(keychain --eval --nogui -Q -q upcnj.tvg.id_dsa id_dsa.achang)
 
 # if in tty1, on login startx
 #if [ -z "$DISPLAY" ] && [ $(tty) = /dev/tty1 ]
