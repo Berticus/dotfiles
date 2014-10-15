@@ -104,14 +104,6 @@ let g:NERDTreeWinSize = 100
 
 " NERDTree
 map <F2> :silent NERDTreeToggle<CR>
-" Toggle number lines
-"map <F3> :call NumberToggle()<CR>
-" Hypergit
-"map <F4> :silent ToggleGitMenu<CR>
-
-" absolute numbers in insert mode
-"autocmd! InsertEnter * set number
-"autocmd! InsertLeave * set relativenumber
 
 set pastetoggle=<leader>p
 
