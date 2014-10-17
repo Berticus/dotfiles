@@ -1,4 +1,3 @@
-#!/usr/bin/sh
 #exportPS1='[\u@\h \W]\$ '
 
 export INPUTRC=/etc/inputrc
