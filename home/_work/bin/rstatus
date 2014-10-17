@@ -1,0 +1,58 @@
+#!/bin/bash
+
+DZENFNT='-xos4-terminus-medium-r-normal--12-120-72-72-c-60-iso8859-1'
+DZENBG='#222222'
+DZENFG='#009cff'
+#DZENFG='#36bc4d'
+DZENX=100
+DZENY=0
+DZENWIDTH=1580
+ICONPATH='/home/achang/.local/share/icons/dzen'
+DZENALIGN=r
+
+INTERFACE='eth0'
+MAIL_FIFO='/home/achang/.thunderbird/lbrc4iow.default/unread-counts'
+DATE_FORMAT='%B %d, %Y (%A)   |   %I:%M:%S (%p)'
+IMPROG='weechat'
+IMFIFO=''
+FORECASTER=''
+
+SLEEP=0.5
+WEATHERIVAL=7200
+
+function fdate()
+{
+  date +"$DATE_FORMAT"
+}
+
+RXB=$(cat /sys/class/net/${INTERFACE}/statistics/rx_bytes)
+TXB=$(cat /sys/class/net/${INTERFACE}/statistics/tx_bytes)
+
+function fmail()
+{
+  count=$(cut -f 1 -d ':' $MAIL_FIFO | head -n 1)
+  if [ "$count" != 0 ]
+  then
+    echo -n "^i(${ICONPATH}/mini.mail.new.xpm)"
+  else
+    echo -n "^i(${ICONPATH}/mini.mail.idle.xpm)"
+  fi
+}
+
+while :; do
+  PDATE=$(fdate)
+  #PMAIL=$(fmail)
+
+  RXBN=$(cat /sys/class/net/${INTERFACE}/statistics/rx_bytes)
+  TXBN=$(cat /sys/class/net/${INTERFACE}/statistics/tx_bytes)
+  RXR=$(printf "%5d\n" $(echo "($RXBN - $RXB) / 1024/${SLEEP}" | bc))
+  TXR=$(printf "%5d\n" $(echo "($TXBN - $TXB) / 1024/${SLEEP}" | bc))
+
+  #echo "${PMAIL}   ${PDATE}"
+  echo "${PDATE}"
+
+  RXB=$RXBN
+  TXB=$TXBN
+
+  sleep $SLEEP
+done | dzen2 -bg $DZENBG -fg $DZENFG -x $DZENX -y $DZENY -tw $DZENWIDTH -ta $DZENALIGN -h 16 -p -fn $DZENFNT -xs 1
