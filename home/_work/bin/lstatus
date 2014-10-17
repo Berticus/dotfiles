@@ -6,7 +6,7 @@ DZENFG='#009cff'
 #DZENFG='#36bc4d'
 DZENX=100
 DZENY=0
-DZENWIDTH=1600
+DZENWIDTH=1900
 ICONPATH='/home/achang/.local/share/icons/dzen'
 DZENALIGN=r
 
