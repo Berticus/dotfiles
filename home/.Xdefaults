@@ -37,12 +37,12 @@ urxvt.matcher.button: 1
 ! color7: white
 
 *.color0: #282a2e
-*.color1: #bc3f39
-*.color2: #48bc39
-*.color3: #bcb739
-*.color4: #3951bc
-*.color5: #bc39a3
-*.color6: #39b1bc
+*.color1: #ff0300
+*.color2: #47ff00
+*.color3: #fdff00
+*.color4: #0800ff
+*.color5: #ca00ff
+*.color6: #006dff
 *.color7: #bbc8d6
 
 ! Bright:
@@ -56,12 +56,12 @@ urxvt.matcher.button: 1
 ! color15: bright white
 
 *.color8: #373b41
-*.color9: #ff5850
-*.color10: #5dff50
-*.color11: #f9ff50
-*.color12: #505dff
-*.color13: #ff50f4
-*.color14: #50e6ff
+*.color9: #e15156
+*.color10: #7ce151
+*.color11: #e1d951
+*.color12: #5160e1
+*.color13: #c451e1
+*.color14: #51b5e1
 *.color15: #c5c8c6
 
 urxvt.*keysym.M-Up: \033[1;3A
