@@ -28,7 +28,7 @@ function sub_int_sign() {
     csr="$1"
     shift
   else
-    echo "Must supply csr (with a csr extension)"
+    echo "Must supply csr (with a csr extension)" >&2
     exit $EXIT_MISSING_REQUIRED_NO_WORK
   fi
 
@@ -44,7 +44,7 @@ function sub_ca_sign() {
     csr="$1"
     shift
   else
-    echo "Must supply csr (with a csr extension)"
+    echo "Must supply csr (with a csr extension)" >&2
     exit $EXIT_MISSING_REQUIRED_NO_WORK
   fi
 
@@ -80,7 +80,7 @@ function sub_new() {
       fi
     else
       # Did not find a high CA
-      echo "Generated $csr_req CSR that needs to be signed"
+      echo "Generated $csr_req CSR that needs to be signed" >&2
       exit $EXIT_MISSING_REQUIRED_PARTIAL_WORK
     fi
   else
@@ -212,13 +212,13 @@ while :; do
 
     --)
       if [ $# -eq 0 ]; then
-        usage
+        usage >&2
         exit $EXIT_NO_ACTION
       fi
       ;;
 
     *)
-      usage
+      usage >&2
       exit $EXIT_SUPPLIED_UNKNOWN
       ;;
   esac
