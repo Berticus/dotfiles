@@ -61,6 +61,7 @@ set magic
 set so=7
 
 set splitright
+set splitbelow
 
 set clipboard=unnamed
 
