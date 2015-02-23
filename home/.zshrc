@@ -11,16 +11,20 @@
 # git status calculation every time a command is executed in a git working
 # directory.
 function precmd() {
+  local _git
+  local _git_status
+  local stashed_files
+  local _git_info
+
   _git=$(git branch 2>/dev/null | sed -e "/^\s/d" -e "s/^\*\s//")
   if [ "$_git" != '' ]; then
 
-    tracked_files="$(git status --porcelain -uno)"
-    untracked_files="$(git status --porcelain)"
+    _git_status=$(git status --porcelain -b)
     stashed_files="$(git stash list)"
-    if [ "$tracked_files" != '' ]; then
+    if [ "$(echo $_git_status | awk '/^ ?M/ {print $0}')" != '' ]; then
       # changes
       _color='\e[1;31m'
-    elif [ "$untracked_files" != '' ]; then
+    elif [ "$(echo $_git_status | awk '/^\?\?/ {print $0}')" != '' ]; then
       # only new files
       _color='\e[0;33m'
     elif [ "$stashed_files" != '' ]; then
@@ -33,14 +37,10 @@ function precmd() {
 
     _git_info=$(echo -e "(%{$_color%}$_git%{\e[0m%}")
 
-    _git_remotes=( $(git remote) )
-    for i in "$_git_remotes"; do
-      _unpushed_changes="$(git log $i/$_git..HEAD)"
-      if [ "$_unpushed_changes" != "" ]; then
+    # TODO: go across all branches to find unpushed changes
+    if [ "$(echo $_git_status | awk '/^##.*\[ahead [0-9]+\]$/ {print $0}')" != '' ]; then
         _git_info="${_git_info}*"
-        break
-      fi
-    done
+    fi
 
     _git_info="${_git_info})"
 
@@ -48,13 +48,6 @@ function precmd() {
   else
     export PS1="[%* %n@%M %c]%# "
   fi
-
-  unset _git
-  unset tracked_files
-  unset untracked_files
-  unset stashed_files
-  unset _color
-  unset _git_info
 }
 
 HISTSIZE=200000
