@@ -50,3 +50,23 @@ export GPG_TTY=$(tty)
 
 # flash fix for when Linux HW  Video Decode is enabled
 #export VDPAU_NVIDIA_NO_OVERLAY=1
+
+export GRADLE_HOME=/usr/share/java/gradle
+
+export SSLKEYLOGFILE=$XDG_DATA_HOME/ssl/sslkeylog.log
+
+export _GIT_SEP=' \e[38;5;248m+'
+
+export _GIT_LOCAL_CHAR='\e[38;5;33m\u25b6'
+export _GIT_AHEAD_CHAR='\e[38;5;202m\u2b06'
+export _GIT_BEHIND_CHAR='\e[38;5;147m\u2b07'
+export _GIT_DIVERGE_CHAR='\u2b0d'
+export _GIT_OK_CHAR='\u25b6'
+
+export _GIT_UNMERGE_COLOR='\e[38;5;196m'
+export _GIT_CHANGES_UNSTAGED_COLOR='\e[38;5;208m'
+export _GIT_CHANGES_INDEXED_COLOR='\e[38;5;226m'
+export _GIT_UNTRACKED_COLOR='\e[38;5;93m'
+export _GIT_NO_CHANGES_COLOR='\e[38;5;82m'
+
+export _GIT_STASH_CHAR='*'

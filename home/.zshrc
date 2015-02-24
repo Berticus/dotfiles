@@ -11,42 +11,63 @@
 # git status calculation every time a command is executed in a git working
 # directory.
 function precmd() {
-  local _git
   local _git_status
-  local stashed_files
+  local _git_branch
+  local _git_stashed_files
   local _git_info
+  local _git_remote_state
+  local _color
 
-  _git=$(git branch 2>/dev/null | sed -e "/^\s/d" -e "s/^\*\s//")
-  if [ "$_git" != '' ]; then
+  _git_status=$(git status --porcelain -b 2> /dev/null)
 
-    _git_status=$(git status --porcelain -b)
-    stashed_files="$(git stash list)"
-    if [ "$(echo $_git_status | awk '/^ ?M/ {print $0}')" != '' ]; then
-      # changes
-      _color='\e[1;31m'
-    elif [ "$(echo $_git_status | awk '/^\?\?/ {print $0}')" != '' ]; then
-      # only new files
-      _color='\e[0;33m'
-    elif [ "$stashed_files" != '' ]; then
-      # stashed files
-      _color='\e[0;34m'
+  if [ $? -eq 0 ]; then
+
+    _git_branch=$(git branch | sed -e "/^\s/d" -e "s/^\*\s//")
+    _git_stashed_files=$(git stash list)
+
+    if [ -n "$(echo $_git_status | egrep '^([AD]?U+[AD]?|AA|DD)')" ]; then
+      # unmerged
+      _color=$_GIT_UNMERGE_COLOR
+    elif [ -n "$(echo $_git_status | egrep '^[ MARC][MD]')" ]; then
+      # changes to working directory (regardless of index's changes)
+      _color=$_GIT_CHANGES_UNSTAGED_COLOR
+    elif [ -n "$(echo $_git_status | egrep '^[MARCD][ MD]')" ]; then
+      # changes in index (working directory match)
+      _color=$_GIT_CHANGES_INDEXED_COLOR
+    elif [ -n "$(echo $_git_status | egrep '^\?\?')" ]; then
+      # untracked files exist, but nothing else
+      _color=$_GIT_UNTRACKED_COLOR
     else
       # no changes
-      _color='\e[0;32m'
+      _color=$_GIT_NO_CHANGES_COLOR
     fi
 
-    _git_info=$(echo -e "(%{$_color%}$_git%{\e[0m%}")
-
-    # TODO: go across all branches to find unpushed changes
-    if [ "$(echo $_git_status | awk '/^##.*\[ahead [0-9]+\]$/ {print $0}')" != '' ]; then
-        _git_info="${_git_info}*"
+    if [ "$(echo $_git_status | grep "^## $_git_branch$")" ]; then
+      # local only
+      _git_remote_state=$_GIT_LOCAL_CHAR
+    elif [ "$(echo $_git_status | grep "^## $_git_branch\.\{3\}.* \[ahead [0-9]*\]")" ]; then
+      # ahead
+      _git_remote_state=$_GIT_AHEAD_CHAR
+    elif [ "$(echo $_git_status | grep "^## $_git_branch\.\{3\}.* \[behind [0-9]*\]")" ]; then
+      # behind
+      _git_remote_state=$_GIT_BEHIND_CHAR
+    elif [ "$(echo $_git_status | grep "^## $_git_branch\.\{3\}.* \[ahead [0-9]*, behind [0-9]*\]")" ]; then
+      # diverging
+      _git_remote_state=$_GIT_DIVERGE_CHAR
+    else
+      _git_remote_state=$_GIT_OK_CHAR
     fi
 
-    _git_info="${_git_info})"
+    # TODO: fix zero width characters (and env)
+    _git_info=$(echo "%{$_GIT_SEP%}%{$_color%}$_git_branch %{$_git_remote_state%}%{\e[0m%}")
 
-    export PS1="[%* %n@%M %c ${_git_info}]%# "
+    if [ $_git_stashed_files ]; then
+      _git_info=$_git_info*
+    fi
+
+    export PS1="$(echo '\u251c')%* %n@%M %c${_git_info}$(echo '\u2502')%# "
   else
-    export PS1="[%* %n@%M %c]%# "
+      export PS1="$(echo '\u251c')%* %n@%M %c$(echo '\u2524')%# "
   fi
 }
 
