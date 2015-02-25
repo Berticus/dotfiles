@@ -1,7 +1,7 @@
 #exportPS1='[\u@\h \W]\$ '
 
 export INPUTRC=/etc/inputrc
-export PATH=$HOME/bin:$HOME/src/hcp-aw/anywhere-qa/ras:$HOME/src/hcp-aw/anywhere-qa/bin:/usr/share/perl5/vendor_perl/auto/share/dist/Cope:$PATH
+export PATH=$HOME/bin:$(cope_path):$PATH
 #export PYTHONPATH=$PYTHONPATH
 export PYTHONSTARTUP=$HOME/.pythonrc
 export BROWSER='firefox'
