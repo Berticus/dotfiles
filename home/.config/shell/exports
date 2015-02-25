@@ -55,13 +55,20 @@ export GRADLE_HOME=/usr/share/java/gradle
 
 export SSLKEYLOGFILE=$XDG_DATA_HOME/ssl/sslkeylog.log
 
-export _GIT_SEP=' \e[38;5;248m+'
+export _GIT_SEP=' +'
+export _GIT_SEP_COLOR='\e[38;5;248m'
 
-export _GIT_LOCAL_CHAR='\e[38;5;33m\u25b6'
-export _GIT_AHEAD_CHAR='\e[38;5;202m\u2b06'
-export _GIT_BEHIND_CHAR='\e[38;5;147m\u2b07'
+export _GIT_LOCAL_CHAR='\u25b6'
+export _GIT_AHEAD_CHAR='\u2b06'
+export _GIT_BEHIND_CHAR='\u2b07'
 export _GIT_DIVERGE_CHAR='\u2b0d'
 export _GIT_OK_CHAR='\u25b6'
+
+export _GIT_LOCAL_COLOR='\e[38;5;33m'
+export _GIT_AHEAD_COLOR='\e[38;5;202m'
+export _GIT_BEHIND_COLOR='\e[38;5;147m'
+export _GIT_DIVERGE_COLOR='\e[0m'
+export _GIT_OK_COLOR=''
 
 export _GIT_UNMERGE_COLOR='\e[38;5;196m'
 export _GIT_CHANGES_UNSTAGED_COLOR='\e[38;5;208m'

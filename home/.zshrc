@@ -17,6 +17,7 @@ function precmd() {
   local _git_info
   local _git_remote_state
   local _color
+  local _color_icon
 
   _git_status=$(git status --porcelain -b 2> /dev/null)
 
@@ -44,22 +45,27 @@ function precmd() {
 
     if [ "$(echo $_git_status | grep "^## $_git_branch$")" ]; then
       # local only
+      _color_icon=$_GIT_LOCAL_COLOR
       _git_remote_state=$_GIT_LOCAL_CHAR
     elif [ "$(echo $_git_status | grep "^## $_git_branch\.\{3\}.* \[ahead [0-9]*\]")" ]; then
       # ahead
+      _color_icon=$_GIT_AHEAD_COLOR
       _git_remote_state=$_GIT_AHEAD_CHAR
     elif [ "$(echo $_git_status | grep "^## $_git_branch\.\{3\}.* \[behind [0-9]*\]")" ]; then
       # behind
+      _color_icon=$_GIT_BEHIND_COLOR
       _git_remote_state=$_GIT_BEHIND_CHAR
     elif [ "$(echo $_git_status | grep "^## $_git_branch\.\{3\}.* \[ahead [0-9]*, behind [0-9]*\]")" ]; then
       # diverging
+      _color_icon=$_GIT_DIVERGE_COLOR
       _git_remote_state=$_GIT_DIVERGE_CHAR
     else
+      _color_icon=$_GIT_OK_COLOR
       _git_remote_state=$_GIT_OK_CHAR
     fi
 
     # TODO: fix zero width characters (and env)
-    _git_info=$(echo "%{$_GIT_SEP%}%{$_color%}$_git_branch %{$_git_remote_state%}%{\e[0m%}")
+    _git_info=$(echo "%{$_GIT_SEP_COLOR%}$_GIT_SEP%{$_color%}$_git_branch%{\e[0m%} %{$_color_icon%}$_git_remote_state%{\e[0m%}")
 
     if [ $_git_stashed_files ]; then
       _git_info=$_git_info*
