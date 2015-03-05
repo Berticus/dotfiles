@@ -23,10 +23,10 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CONFIG_HOME="$HOME/.config"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
-os=$(source=$(if [[ -e /etc/os-release ]]; then echo "/etc/os-release"; else echo "/usr/lib/os-release"; fi;); awk -F = '/^NAME=/ {print $2}' $source)
+os=$(rel_source=$(if [[ -e /etc/os-release ]]; then echo "/etc/os-release"; else echo "/usr/lib/os-release"; fi;); awk -F = '/^NAME=/ {print $2}' $rel_source | tr -d '"')
 if [[ $os = "Arch Linux" ]]; then
-  export JAVA_HOME=/usr/lib/jvm/java-7-openjdk/jre/
-  export JDK_HOME=/usr/lib/jvm/java-7-openjdk/
+  export JAVA_HOME=/usr/lib/jvm/java-8-openjdk/jre/
+  export JDK_HOME=/usr/lib/jvm/java-8-openjdk/
 elif [[ $os = "Fedora" ]]; then
   export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.60-2.4.7.0.fc20.x86_64/jre/
   export JDK_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.60-2.4.7.0.fc20.x86_64/
