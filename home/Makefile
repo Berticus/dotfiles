@@ -1,45 +1,45 @@
-OPENSSL=	openssl
-CNF=		openssl.cnf
-CA=		${OPENSSL} ca -config ${CNF}
-REQ=		${OPENSSL} req -config ${CNF}
+CC = gcc
+RM = rm
 
-KEY=		private/cakey.pem
-KEYMODE=	RSA
+CFLAGS = -Wall -Wextra -ansi -pedantic
+LIBS = 
+OBJECTS = 
+PROG = 
+SOURCES = 
+D_FLAGS = -g -DDEBUG
+debug_prefix = d_
 
-CACERT=		cacert.pem
-CADAYS=		3650
-
-CRL=		crl.pem
-INDEX=		index.txt
-SERIAL=		serial
+D_OBJECTS := $(OBJECTS:%=$(debug_prefix)%)
 
 
-CADEPS=		${CNF} ${KEY} ${CACERT}
 
-all:	${CRL}
+$(PROG) : $(OBJECTS) $(LIBS) $(SOURCES)
+	$(CC) $(CFLAGS) -o $@ $^
 
-${CRL}:	${CADEPS}
-	${CA} -gencrl -out ${CRL}
+$(PROG)-debug : $(D_OBJECTS) $(LIBS) $(SOURCES)
+	$(CC) $(CFLAGS) -o $@ $^
 
-${CACERT}: ${CNF} ${KEY}
-	${REQ} -key ${KEY} -x509 -new -days ${CADAYS} -out ${CACERT}
-	rm -f ${INDEX}
-	touch ${INDEX}
-	echo 100001 > ${SERIAL}
+$(PROG)-debug : CFLAGS += $(D_FLAGS)
 
-${KEY}: ${CNF}
-	mkdir -m0700 -p $(dir ${KEY})
-	touch ${KEY}
-	chmod 0600 ${KEY}
-	${OPENSSL} genpkey -algorithm ${KEYMODE} -out ${KEY}
+# Enter recipes for debug objects below
+#d_example.o : example.c example.h
+#	$(CC) $(CFLAGS) -c -o $@ $<
 
 
-revoke:	${CADEPS} ${item}
-	@test -n $${item:?'usage: ${MAKE} revoke item=cert.pem'}
-	${CA} -revoke ${item}
-	${MAKE} ${CRL}
 
-sign:	${CADEPS} ${item}
-	@test -n $${item:?'usage: ${MAKE} sign item=request.csr'}
-	mkdir -p newcerts
-	${CA} -in ${item} -out ${item:.csr=.crt} 
+debug : $(PROG)-debug
+
+all : $(PROG)-debug $(PROG)
+
+#test :
+
+clean :
+	-@$(RM) $(PROG) $(PROG)-debug 2> /dev/null || true
+
+cleanobj :
+	-@$(RM) *.o 2> /dev/null || true
+
+cleanall : clean cleanobj
+
+.POSIX:
+.PHONY: debug all test clean cleanobj cleanall
